@@ -4,11 +4,17 @@
 (load "modexp.lisp")
 (load "dbg.lisp")
 
+(defun random-from-range (start end)
+  (+ start (random (+ 1 (- end start)))))
+
 (defun serialize (text)
   (map 'list (lambda (c) (char-code c)) text))
 
 (defun deserialize (charcodes)
   (map 'string (lambda (c) (code-char c)) charcodes))
+
+(defun random-message (len)
+  (map 'string (lambda (c) (code-char (random-from-range 65 90))) (make-list len)))
 
 (defun e (phi)
   (loop
@@ -26,8 +32,7 @@
   (map 'list (lambda (c) (mod-exp c (car key) (cdr key))) char-codes))
 
 (defun main ()
-  (when (< (length sb-ext:*posix-argv*) 2) (print "No arg")(exit))
-  (let* ((msg (nth 1 sb-ext:*posix-argv*))
+  (let* ((msg (random-message 50))
          (p (rand-prime))
          (q (rand-prime))
          (n (* p q))
@@ -39,7 +44,8 @@
          (c (encrypt (serialize msg) public-key))
          (de (deserialize (decrypt c private-key))))
 
-    (dbg-many msg p q n phi e d c de)))
+    (dbg-many msg p q n phi e d c de)
+    (assert (string= msg de))))
 
-(main)
+(time (main))
 

@@ -1,3 +1,5 @@
+(setf *random-state* (make-random-state t))
+
 (defun plist (n)
   "return the list of primes not greater than n. 
    build it by means of the sieve of Eratosthenes."
@@ -12,7 +14,8 @@
         (loop for i from (* p p) to n by (* 2 p)  ; mark the multiples
               do (setf (aref arr i) nil)))))
 
-(defvar primes (subseq (plist 100000) 1000))
-(nth (random 1000) primes)
+(defvar primes
+  (remove-if (lambda (p) (< p 1000))
+             (plist 10000)))
 
-(defun rand-prime () (nth (random 1000) primes))
+(defun rand-prime () (nth (random (length primes)) primes))
