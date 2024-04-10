@@ -2,7 +2,7 @@ use gcd::Gcd;
 use rand::Rng;
 
 fn check_input(p: u32, q: u32) {
-    let check_mod = |n: u32| n % 4 == 3;
+    let check_mod = |n: u32| return n % 4 == 3;
     assert!(primal::is_prime(p.into()));
     assert!(primal::is_prime(q.into()));
     assert!(check_mod(p));
@@ -21,6 +21,7 @@ impl BBS {
         let seed = Self::find_seed(n);
         Self { seed, n }
     }
+    
     pub fn next(&mut self) -> bool {
         let (n, x) = (self.n, self.seed);
         let x = (x * x) % n;

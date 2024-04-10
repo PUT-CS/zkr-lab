@@ -9,6 +9,13 @@ mod test {
         static ref BITS: Vec<bool> = get_bits();
     }
 
+    fn get_bits() -> Vec<bool> {
+        let p: u32 = 7927;
+        let q: u32 = 7331;
+        let mut gen = BBS::new(p, q);
+        (0..SIZE).map(|_| gen.next()).collect()
+    }
+
     #[test]
     fn single_bits_test() {
         let ones = BITS.iter().filter(|&&b| b == true).count();
@@ -17,7 +24,7 @@ mod test {
 
     #[test]
     fn series_test() {
-        let permitted_ranges = HashMap::<usize, _>::from([
+        let permitted_ranges = HashMap::from([
             (1, 2315..=2685),
             (2, 1114..=1386),
             (3, 527..=723),
@@ -25,16 +32,15 @@ mod test {
             (5, 103..=209),
             (6, 103..=209),
         ]);
-        let lengths = 1..=6;
 
         let counts0 = series(&BITS, true);
         let counts1 = series(&BITS, false);
 
-        for len in lengths {
-            let series0 = counts0[len];
-            assert!(permitted_ranges.get(&len).unwrap().contains(&series0));
-            let series1 = counts1[len];
-            assert!(permitted_ranges.get(&len).unwrap().contains(&series1));
+        for (len, range) in (1..=6).zip(permitted_ranges) {
+            let series0 = counts0[len-1];
+            let series1 = counts1[len-1];
+            assert!(range.1.contains(&series0));
+            assert!(range.1.contains(&series1));
         }
     }
 
@@ -62,19 +68,21 @@ mod test {
 
     fn series(arr: &[bool], kind: bool) -> Vec<i32> {
         let mut current_length = 0;
-        let mut counts = vec![0; 7];
+        let mut counts = vec![0; 6];
         for bit in arr {
             if bit == &kind {
                 current_length += 1;
             } else {
                 if current_length > 0 {
-                    counts[current_length.min(6)] += 1;
+                    let idx = current_length - 1;
+                    counts[idx.min(5)] += 1;
                     current_length = 0;
                 }
             }
         }
         if current_length > 0 {
-            counts[current_length.min(6)] += 1;
+            let idx = current_length - 1;
+            counts[idx.min(5)] += 1;
         }
         counts
     }
@@ -85,6 +93,7 @@ mod test {
             if bit == &kind {
                 current_length += 1;
             } else {
+                current_length = 0;
                 if current_length >= 26 {
                     return false;
                 }
@@ -96,14 +105,6 @@ mod test {
         true
     }
 
-    fn get_bits() -> Vec<bool> {
-        // let p: u32 = 7927;
-        // let q: u32 = 7331;
-        let p: u32 = 1999;
-        let q: u32 = 8243;
-        let mut gen = BBS::new(p, q);
-        (0..SIZE).map(|_| gen.next()).collect()
-    }
     fn convert(bits: &[bool]) -> u8 {
         let mut result: u8 = 0;
         bits.iter().for_each(|&bit| {
