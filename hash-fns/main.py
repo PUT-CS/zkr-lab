@@ -72,17 +72,33 @@ def input_pairs(length):
     b = string + chr(letter + 1)
     return (a, b)
 
+def generate_mutations(string):
+    swap = lambda old, char: old[:i] + char + old[i+1:]
+    mutations = []
+    for i, bit in enumerate(string):
+        if bit == "0":
+            mutations.append(swap(string, "1"))
+        else:
+            mutations.append(swap(string, "0"))
+    return mutations
+        
 def sac():
-    for (a, b) in [input_pairs(100) for x in range(100)]:
-        (a_hash, b_hash) = (hashlib.sha512(a.encode()).hexdigest(), hashlib.sha512(b.encode()).hexdigest())
-        (a_hash_bits, b_hash_bits) = (str_to_bits(a_hash), str_to_bits(b_hash))
+    a = str_to_bits(rand_str(100))
+    print(a)
+    b = generate_mutations(a)
+    a_hash = hashlib.sha256(a.encode()).hexdigest()
+    a_hash_bits = str_to_bits(a_hash)
+    
+    for mutation in b:
+        b_hash = hashlib.sha256(mutation.encode()).hexdigest()
+        b_hash_bits = str_to_bits(b_hash)
         diff = sum([1 for i in range(len(a_hash_bits)) if a_hash_bits[i] != b_hash_bits[i]]) / len(a_hash_bits)
-        print(diff)
+        print("SAC:", diff)
         
 def main():
     test_md5 = hashlib.md5("Kot".encode()).hexdigest()
-    collisions()
+    # collisions()
     sac()
-    benchmarks()
+    # benchmarks()
         
 main()
