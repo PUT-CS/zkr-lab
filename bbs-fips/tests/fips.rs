@@ -104,7 +104,6 @@ mod test {
         for bit in arr {
             if bit == &kind {
                 current_length += 1;
-                dbg!(current_length);
             } else {
                 current_length = 0;
                 if current_length >= 26 {
