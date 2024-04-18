@@ -1,7 +1,7 @@
 import random
 from PIL import Image
 
-choices = [(0,1),(1,0)]
+noise_types = [(0,1),(1,0)]
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
@@ -11,16 +11,13 @@ def loadImage(path):
     pixel_values = list(im.getdata())
     return (width, height, pixel_values)
 
-def isWhite(pixel):
-    return pixel == WHITE
-
 def dividePixel(pixel):
-    if (isWhite(pixel)):
-        u1 = random.choice(choices) # generate a random variation of noise
+    if (pixel == WHITE):
+        u1 = random.choice(noise_types) # generate a random variation of noise
         return (u1, u1)
     else:
-        random.shuffle(choices)
-        return (choices[0], choices[1]) # if black, generate two opposite variations of noise
+        random.shuffle(noise_types)
+        return (noise_types[0], noise_types[1]) # if black, generate two opposite variations of noise
 
 def divideImage(width, height, data):
     u1, u2 = [], []
@@ -55,7 +52,7 @@ def saveLayer(u, width, height, path):
     image.save(path)
 
 def main():
-    width, height, data = loadImage("./fiut.png")
+    width, height, data = loadImage("./polska.png")
     assert width == height
     u1, u2 = divideImage(width, height, data)
     lastSection = composeLayers(u1, u2, width, height)
