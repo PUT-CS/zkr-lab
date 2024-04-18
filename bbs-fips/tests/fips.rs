@@ -2,16 +2,30 @@
 mod test {
     use bbs_fips::BBS;
     use lazy_static::lazy_static;
-    use std::collections::HashMap;
+    use rand::seq::SliceRandom;
+    use std::{collections::HashMap, ops::Sub};
     const SIZE: usize = 20_000;
 
     lazy_static! {
         static ref BITS: Vec<bool> = get_bits();
+        static ref PRIMES: Vec<u32> = get_primes();
+    }
+
+    fn get_primes() -> Vec<u32> {
+        (1000..=10000)
+            .filter(|&n| primal::is_prime(n) && n % 4 == 3)
+            .map(|n| n as u32)
+            .collect()
+    }
+
+    fn rand_primes() -> (u32, u32) {
+        let p = PRIMES.choose(&mut rand::thread_rng()).unwrap();
+        let q = PRIMES.choose(&mut rand::thread_rng()).unwrap();
+        (*p, *q)
     }
 
     fn get_bits() -> Vec<bool> {
-        let p: u32 = 7927;
-        let q: u32 = 7331;
+        let (p, q) = rand_primes();
         let mut gen = BBS::new(p, q);
         (0..SIZE).map(|_| gen.next()).collect()
     }
@@ -36,11 +50,11 @@ mod test {
         let counts0 = series(&BITS, true);
         let counts1 = series(&BITS, false);
 
-        for (len, range) in (1..=6).zip(permitted_ranges) {
-            let series0 = counts0[len-1];
-            let series1 = counts1[len-1];
-            assert!(range.1.contains(&series0));
-            assert!(range.1.contains(&series1));
+        for (len, range) in permitted_ranges {
+            let series0 = counts0[len - 1];
+            let series1 = counts1[len - 1];
+            assert!(range.contains(&series0));
+            assert!(range.contains(&series1));
         }
     }
 
@@ -48,7 +62,7 @@ mod test {
     fn long_series_test() {
         let series0 = long_series(&BITS, true);
         let series1 = long_series(&BITS, false);
-        assert!(!series0 && !series1);
+        assert!(series0 && series1);
     }
 
     #[test]
@@ -67,22 +81,20 @@ mod test {
     }
 
     fn series(arr: &[bool], kind: bool) -> Vec<i32> {
-        let mut current_length = 0;
+        let mut current_length: usize = 0;
         let mut counts = vec![0; 6];
         for bit in arr {
             if bit == &kind {
                 current_length += 1;
             } else {
                 if current_length > 0 {
-                    let idx = current_length - 1;
-                    counts[idx.min(5)] += 1;
+                    counts[current_length.sub(1).min(5)] += 1;
                     current_length = 0;
                 }
             }
         }
         if current_length > 0 {
-            let idx = current_length - 1;
-            counts[idx.min(5)] += 1;
+            counts[current_length.sub(1).min(5)] += 1;
         }
         counts
     }
@@ -92,6 +104,7 @@ mod test {
         for bit in arr {
             if bit == &kind {
                 current_length += 1;
+                dbg!(current_length);
             } else {
                 current_length = 0;
                 if current_length >= 26 {
