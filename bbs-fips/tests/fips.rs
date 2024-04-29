@@ -3,7 +3,6 @@ mod test {
     use bbs_fips::BBS;
     use lazy_static::lazy_static;
     use rand::seq::SliceRandom;
-    use std::collections::HashMap;
     use std::{collections::HashMap, ops::Sub};
     const SIZE: usize = 20_000;
 
@@ -26,24 +25,6 @@ mod test {
 
     fn get_bits() -> Vec<bool> {
         let (p, q) = get_random_primes();
-    }
-
-    fn get_primes() -> Vec<u32> {
-        (1000..=10000)
-            .filter(|&n| primal::is_prime(n) && n % 4 == 3)
-            .map(|n| n as u32)
-            .collect()
-    }
-
-    fn rand_primes() -> (u32, u32) {
-        let p = PRIMES.choose(&mut rand::thread_rng()).unwrap();
-        let q = PRIMES.choose(&mut rand::thread_rng()).unwrap();
-        (*p, *q)
-    }
-
-    fn get_bits() -> Vec<bool> {
-        let (p, q) = rand_primes();
->>>>>>> 40e478dc7b6cbf284f328881b0d423c0aa1c680c
         let mut gen = BBS::new(p, q);
         (0..SIZE).map(|_| gen.next()).collect()
     }
