@@ -4,6 +4,7 @@ mod test {
     use lazy_static::lazy_static;
     use rand::seq::SliceRandom;
     use std::collections::HashMap;
+    use std::{collections::HashMap, ops::Sub};
     const SIZE: usize = 20_000;
 
     lazy_static! {
@@ -25,6 +26,24 @@ mod test {
 
     fn get_bits() -> Vec<bool> {
         let (p, q) = get_random_primes();
+    }
+
+    fn get_primes() -> Vec<u32> {
+        (1000..=10000)
+            .filter(|&n| primal::is_prime(n) && n % 4 == 3)
+            .map(|n| n as u32)
+            .collect()
+    }
+
+    fn rand_primes() -> (u32, u32) {
+        let p = PRIMES.choose(&mut rand::thread_rng()).unwrap();
+        let q = PRIMES.choose(&mut rand::thread_rng()).unwrap();
+        (*p, *q)
+    }
+
+    fn get_bits() -> Vec<bool> {
+        let (p, q) = rand_primes();
+>>>>>>> 40e478dc7b6cbf284f328881b0d423c0aa1c680c
         let mut gen = BBS::new(p, q);
         (0..SIZE).map(|_| gen.next()).collect()
     }
@@ -61,7 +80,7 @@ mod test {
     fn long_series_test() {
         let series0 = long_series(&BITS, true);
         let series1 = long_series(&BITS, false);
-        assert!(!series0 && !series1);
+        assert!(series0 && series1);
     }
 
     #[test]
@@ -80,22 +99,20 @@ mod test {
     }
 
     fn series(arr: &[bool], kind: bool) -> Vec<i32> {
-        let mut current_length = 0;
+        let mut current_length: usize = 0;
         let mut counts = vec![0; 6];
         for bit in arr {
             if bit == &kind {
                 current_length += 1;
             } else {
                 if current_length > 0 {
-                    let idx = current_length - 1;
-                    counts[idx.min(5)] += 1;
+                    counts[current_length.sub(1).min(5)] += 1;
                     current_length = 0;
                 }
             }
         }
         if current_length > 0 {
-            let idx = current_length - 1;
-            counts[idx.min(5)] += 1;
+            counts[current_length.sub(1).min(5)] += 1;
         }
         counts
     }
