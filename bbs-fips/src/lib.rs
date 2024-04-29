@@ -1,12 +1,11 @@
 use gcd::Gcd;
-use rand::Rng;
+use rand::{seq::IteratorRandom, Rng};
 
 fn check_input(p: u32, q: u32) {
-    let check_mod = |n: u32| return n % 4 == 3;
     assert!(primal::is_prime(p.into()));
     assert!(primal::is_prime(q.into()));
-    assert!(check_mod(p));
-    assert!(check_mod(q));
+    assert!(p % 4 == 3);
+    assert!(q % 4 == 3);
 }
 
 pub struct BBS {
@@ -26,16 +25,12 @@ impl BBS {
         let (n, x) = (self.n, self.seed);
         let x = (x * x) % n;
         self.seed = x;
-        x % 2 != 0
+        x % 2 == 0
     }
 
     fn find_seed(n: u128) -> u128 {
-        loop {
-            let x = rand::thread_rng().gen_range(1000..=9999) as u128;
-            if x.gcd(n) == 1 {
-                return x;
-            }
-        }
+        let valid_seeds = (1000..=9999).filter(|&x| x.gcd(n) == 1);
+        valid_seeds.choose(&mut rand::thread_rng()).unwrap().into()
     }
 }
 

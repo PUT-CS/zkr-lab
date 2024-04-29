@@ -2,16 +2,29 @@
 mod test {
     use bbs_fips::BBS;
     use lazy_static::lazy_static;
+    use rand::seq::SliceRandom;
     use std::collections::HashMap;
     const SIZE: usize = 20_000;
 
     lazy_static! {
         static ref BITS: Vec<bool> = get_bits();
+        static ref PRIMES: Vec<u64> = get_primes();
+    }
+
+    fn get_primes() -> Vec<u64> {
+        (1000..10_000)
+            .filter(|&n| primal::is_prime(n) && n % 4 == 3)
+            .collect()
+    }
+
+    fn get_random_primes() -> (u32, u32) {
+        let p = *PRIMES.choose(&mut rand::thread_rng()).unwrap() as u32;
+        let q = *PRIMES.choose(&mut rand::thread_rng()).unwrap() as u32;
+        (p, q)
     }
 
     fn get_bits() -> Vec<bool> {
-        let p: u32 = 7927;
-        let q: u32 = 7331;
+        let (p, q) = get_random_primes();
         let mut gen = BBS::new(p, q);
         (0..SIZE).map(|_| gen.next()).collect()
     }
@@ -36,11 +49,11 @@ mod test {
         let counts0 = series(&BITS, true);
         let counts1 = series(&BITS, false);
 
-        for (len, range) in (1..=6).zip(permitted_ranges) {
-            let series0 = counts0[len-1];
-            let series1 = counts1[len-1];
-            assert!(range.1.contains(&series0));
-            assert!(range.1.contains(&series1));
+        for (len, range) in permitted_ranges {
+            let series0 = counts0[len - 1];
+            let series1 = counts1[len - 1];
+            assert!(range.contains(&series0));
+            assert!(range.contains(&series1));
         }
     }
 

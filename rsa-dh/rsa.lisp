@@ -24,15 +24,15 @@
 (defun d (e phi) (mod-inverse e phi))
 
 (defun encrypt (char-codes key)
-  (print "encrypting...")
+  (format t "encrypting...~%")
   (map 'list (lambda (c) (mod-exp c (car key) (cdr key))) char-codes))
 
 (defun decrypt (char-codes key)
-  (print "decrypting...")
+  (format t "decrypting...~%")
   (map 'list (lambda (c) (mod-exp c (car key) (cdr key))) char-codes))
 
 (defun main ()
-  (let* ((msg (random-message 50))
+  (let* ((msg (random-message 10))
          (p (rand-prime))
          (q (rand-prime))
          (n (* p q))
