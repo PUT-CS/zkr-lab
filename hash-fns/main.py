@@ -27,7 +27,7 @@ def benchmarks():
             duration = timeit.timeit(fn, number=10)
             hash_times[hasher.name] = duration
 
-    hash_lengths = { hasher.name: len(hasher.hexdigest()) for hasher in hashers}
+    hash_lengths = { hasher.name: len(''.join(format(ord(i), '08b') for i in hasher.hexdigest())) / 2 for hasher in hashers}
 
     import matplotlib.pyplot as plt
     plt.bar(*zip(*sorted(hash_lengths.items(), key=lambda x: x[1])))
@@ -46,7 +46,7 @@ def str_to_bits(string) -> list[chr]:
 def collisions():
     print("Checking for collisions in the first 12 bits of the hash...")
     to_check = 12
-    tests = 1_000_000
+    tests = 10000
     collision_count = 0
 
     base_hash = hashlib.sha256(rand_str(30).encode()).hexdigest()
@@ -85,22 +85,21 @@ def generate_mutations(string):
     return mutations
         
 def sac():
-    a = str_to_bits(rand_str(100))
-    print(a)
-    b = generate_mutations(a)
-    a_hash = hashlib.sha256(a.encode()).hexdigest()
-    a_hash_bits = str_to_bits(a_hash)
+    text1 = hashlib.sha256("ala ma c".encode()).hexdigest()
+    text2 = hashlib.sha256("ala ma d".encode()).hexdigest()
     
-    for mutation in b:
-        b_hash = hashlib.sha256(mutation.encode()).hexdigest()
-        b_hash_bits = str_to_bits(b_hash)
-        diff = sum([1 for i in range(len(a_hash_bits)) if a_hash_bits[i] != b_hash_bits[i]]) / len(a_hash_bits)
-        print("SAC:", diff)
+    hashed_text1 = bin(int(text1, 16)).removeprefix("0b").zfill(256)
+    hashed_text2 = bin(int(text2, 16)).removeprefix("0b").zfill(256)
+    count = sum([1 if hashed_text1[x] == hashed_text2[x] else 0 for x in range(len(hashed_text1))])
+
+    result = count / len(hashed_text1)
+    print("SAC:", round(result, 6))
         
 def main():
     test_md5 = hashlib.md5("Kot".encode()).hexdigest()
-    collisions()
+    #print(test_md5)
+    #collisions()
     sac()
-    benchmarks()
+    #benchmarks()
         
 main()
