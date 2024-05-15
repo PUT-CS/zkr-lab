@@ -46,20 +46,22 @@ def str_to_bits(string) -> list[chr]:
 def collisions():
     print("Checking for collisions in the first 12 bits of the hash...")
     to_check = 12
-    tests = 1_000
+    tests = 1_000_000
+    collision_count = 0
 
-    data = []
+    base_hash = hashlib.sha256(rand_str(30).encode()).hexdigest()
+    base_hash_bits = str_to_bits(base_hash)
+
     for i in range(tests):
         s = rand_str(30)
         s_hash = hashlib.sha256(s.encode()).hexdigest()
         s_hash_bits = str_to_bits(s_hash)
-        data.append(s_hash_bits[:to_check])
+        if s_hash_bits[:to_check] == base_hash_bits[:to_check]:
+            collision_count += 1
 
-    collisions = len(data) - len(set(data))
-
-    print("Collision count:", collisions)
+    print("Collision count:", collision_count)
     print("in", tests, "tests")
-    print("Collision probability:", collisions / tests)
+    print("Collision probability:", collision_count / tests)
 
 def input_pairs(length):
     def even_letter_code():
@@ -97,8 +99,8 @@ def sac():
         
 def main():
     test_md5 = hashlib.md5("Kot".encode()).hexdigest()
-    # collisions()
+    collisions()
     sac()
-    # benchmarks()
+    benchmarks()
         
 main()
